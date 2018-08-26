@@ -1,0 +1,8 @@
+name: Minejump
+version: 1.0
+author: Gaetann18
+main: com.mineaurion.minejump.Main
+commands:
+    checkpoint:
+      description: Tp to last checkpoint
+
