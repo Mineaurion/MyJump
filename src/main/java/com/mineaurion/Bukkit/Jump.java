@@ -1,4 +1,4 @@
-package com.mineaurion.minejump;
+package com.mineaurion.Bukkit;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,15 +42,16 @@ public class Jump {
 	}
 
 
-	public void startJump(Player playerplate, Location location) {
-		if(compareTimeStarted(playerplate)) {
-			MainClass.getServer().dispatchCommand(MainClass.getServer().getConsoleSender(), "fly "+playerplate.getName()+" off");
-			crono.put(playerplate.getName(), System.currentTimeMillis());
-			checkpoint.put(playerplate.getName(),location);
-			MainClass.sendmessage("{{BLUE}}Timer lancé", playerplate.getName());
-			MainClass.sendmessage("{{BLUE}}A toi de jouer, bonne chance", playerplate.getName());
-			MainClass.sendmessage("{{BLUE}}Tu a accès au {{RED}}/checkpoint {{BLUE}} pour retourner au checkpoint", playerplate.getName());
-			createScoreboard(playerplate);
+	public void startJump(Player player, Location location) {
+		if(compareTimeStarted(player)) {
+			String name = player.getName();
+			MainClass.getServer().dispatchCommand(MainClass.getServer().getConsoleSender(), "fly "+name+" off");
+			crono.put(name, System.currentTimeMillis());
+			checkpoint.put(name,location);
+			MainClass.sendmessage("{{BLUE}}Timer lancé", name);
+			MainClass.sendmessage("{{BLUE}}A toi de jouer, bonne chance", name);
+			MainClass.sendmessage("{{BLUE}}Tu a accès au {{RED}}/checkpoint {{BLUE}} pour retourner au checkpoint", name);
+			createScoreboard(player);
 		}
 	
 	}
@@ -72,11 +73,7 @@ public class Jump {
 		}
 		return false;
 	}
-	
-	//HashMap->put
-	//		->get
-	//		->containsKey
-	
+		
 	
 	public boolean Checkpointegal(Player player,Location location) 
 	{
@@ -92,17 +89,19 @@ public class Jump {
 	}
 	
 	
-	public void stopJump(Player playerplate,boolean finish) {
+	public void stopJump(Player player,boolean finish) {
 		if(finish) {
 			Long current = System.currentTimeMillis();
-			setFirstPosition(playerplate,current);
-			MainClass.sendmessage("{{GOLD}} Bravo à toi !", playerplate.getName());
-			sendChrono(playerplate, "{{BLUE}}Ton temps final ",current);
+			if(checkTimeToBan(current,player)) {
+				setLeader(player, current);
+				MainClass.sendmessage("{{GOLD}} Bravo à toi !", player.getName());
+				sendChrono(player, "{{BLUE}}Ton temps final ",current);
+			}
 		}
-		crono.remove(playerplate.getName());
-		checkpoint.remove(playerplate.getName());
-		scoreboards.remove(playerplate.getName());
-		playerplate.setScoreboard(scoreboardmanager.getMainScoreboard());
+		crono.remove(player.getName());
+		checkpoint.remove(player.getName());
+		scoreboards.remove(player.getName());
+		player.setScoreboard(scoreboardmanager.getMainScoreboard());
 		
 	}
 	
@@ -199,92 +198,65 @@ public class Jump {
 			scoreboards.put(key, board);
 		}
 	}
-	public void setFirstPosition(Player player,Long current) {
-		Long timestamp = (current - crono.get(player.getName()));
-		String mili = String.valueOf((int) (timestamp%1000));
-		String seconde = String.valueOf((int) (timestamp / 1000) % 60 );
-		String minute = String.valueOf((int) ((timestamp / (1000*60)) % 60));
-		String hour   = String.valueOf((int) ((timestamp / (1000*60*60)) % 24));
-		
-		
-        Location locsignTime = new Location(player.getWorld(), 70, 73, -70);
-        Sign timestampSign = (Sign)locsignTime.getBlock().getState();
-        Long timestampSignValue = Long.valueOf(timestampSign.getLine(0));
-        
-        if(timestamp<timestampSignValue) {
-            timestampSign.setLine(0, String.valueOf(timestamp));
-            timestampSign.update();
-            
-            
-            
-            Location locTimerSign = new Location(player.getWorld(), 70, 73, -68);
-            Sign timerSign = (Sign)locTimerSign.getBlock().getState();
-            String oldName = timerSign.getLine(3);
-            
-            setTimerSign(locTimerSign,hour,minute,seconde,mili,player.getName());
-            
-            Location locPlayerHead = new Location(player.getWorld(), 70, 74, -69);
-            spawnHeadBlock(locPlayerHead, player.getName(), "SOUTH");
-            
-            
-            
-            setSecondPosition(player,timestampSignValue,oldName);
-        }else {
-            setSecondPosition(player,timestamp,player.getName());
-        }
-    }
-    
-    public void setSecondPosition(Player player,Long timestamp,String name) {
- 
-		String mili = String.valueOf((int) (timestamp%1000));
-		String seconde = String.valueOf((int) (timestamp / 1000) % 60 );
-		String minute = String.valueOf((int) ((timestamp / (1000*60)) % 60));
-		String hour   = String.valueOf((int) ((timestamp / (1000*60*60)) % 24));
-		
-        Location locsignTime = new Location(player.getWorld(), 69, 72, -70);
-        Sign timestampSign = (Sign)locsignTime.getBlock().getState();
-        Long timestampSignValue = Long.valueOf(timestampSign.getLine(0));
-        if(timestamp<timestampSignValue) {
-            timestampSign.setLine(0, String.valueOf(timestamp));
-            timestampSign.update();
-            
-            Location locTimerSign = new Location(player.getWorld(), 69, 72, -68);
-            Sign timerSign = (Sign)locTimerSign.getBlock().getState();
-            String oldName = timerSign.getLine(3);
-            setTimerSign(locTimerSign,hour,minute,seconde,mili,name);
-            
-            Location locPlayerHead = new Location(player.getWorld(), 69, 73, -69);
-            spawnHeadBlock(locPlayerHead, name, "SOUTH");
-            
-            
-            setThirdPosition(player,timestampSignValue,oldName);
-        }else {
-            setThirdPosition(player,timestamp,player.getName());
-        }
-    }
-    
-    public void setThirdPosition(Player player,Long timestamp,String name) {
-    	String mili = String.valueOf((int) (timestamp%1000));
-		String seconde = String.valueOf((int) (timestamp / 1000) % 60 );
-		String minute = String.valueOf((int) ((timestamp / (1000*60)) % 60));
-		String hour   = String.valueOf((int) ((timestamp / (1000*60*60)) % 24));
-    	
-        Location locsignTime = new Location(player.getWorld(), 71, 72, -70);
-        Sign timestampSign = (Sign)locsignTime.getBlock().getState();
-        Long timestampSignValue = Long.valueOf(timestampSign.getLine(0));
-        
-        if(timestamp<timestampSignValue) {
-            timestampSign.setLine(0, String.valueOf(timestamp));
-            timestampSign.update();
-            
-            Location locTimerSign = new Location(player.getWorld(), 71, 72, -68);
-            setTimerSign(locTimerSign,hour,minute,seconde,mili,name);
-            
-            Location locPlayerHead = new Location(player.getWorld(), 71, 73, -69);
-            spawnHeadBlock(locPlayerHead, name, "SOUTH");
-        }
-    }
-    
+	
+	
+	public boolean checkTimeToBan(Long current,Player player) {
+		Long time = (current - crono.get(player.getName()));
+		if(time<=(MainClass.config.getInt("timeMinimum")*1000)) {
+			MainClass.mysqlEngine.AddBannedPlayer(player.getUniqueId().toString(), player.getName(), time.intValue());
+			MainClass.sendmessage("{{RED}}Comment peut tu faire un temps aussi court, tu es ajouté à la blacklist. Contacte un admin si tu n'es pas d'accord ", player.getName());
+			return false;
+		}else {
+			return true;
+		}
+	}
+	
+	
+	public void setLeader(Player player, Long current) {
+		Long time = (current - crono.get(player.getName()));
+		MainClass.mysqlEngine.setScorePlayer(player.getUniqueId().toString(), player.getName(), time.intValue());
+		updateLeader(player);
+	}
+	
+	public void updateLeader(Player player) {
+		int i = 1;
+		HashMap<String, Integer> top = MainClass.mysqlEngine.getThirdPlayer();
+		Iterator<Entry<String, Integer>> it = top.entrySet().iterator();
+		while(it.hasNext()) {
+			Map.Entry<String,Integer> pair = (Map.Entry<String,Integer>)it.next();
+			String name = pair.getKey();
+			Integer timestamp = pair.getValue();
+			
+			String mili = String.valueOf((int) (timestamp%1000));
+			String seconde = String.valueOf((int) (timestamp / 1000) % 60 );
+			String minute = String.valueOf((int) ((timestamp / (1000*60)) % 60));
+			String hour   = String.valueOf((int) ((timestamp / (1000*60*60)) % 24));
+			
+			Location locTimerSign = null;
+			Location locPlayerHead = null;
+			switch(i){
+				
+				case 1:
+					locTimerSign = new Location(player.getWorld(), 70, 73, -68);
+		            locPlayerHead = new Location(player.getWorld(), 70, 74, -69);
+					break;
+				case 2:
+					locTimerSign = new Location(player.getWorld(), 69, 72, -68);
+		            locPlayerHead = new Location(player.getWorld(), 69, 73, -69);
+		            
+					break;
+				case 3:
+					locTimerSign = new Location(player.getWorld(), 71, 72, -68);
+		            locPlayerHead = new Location(player.getWorld(), 71, 73, -69);
+					break;
+			}
+			setTimerSign(locTimerSign,hour,minute,seconde,mili,name);
+			spawnHeadBlock(locPlayerHead, name, "SOUTH");
+			
+			i++;
+		}
+	}
+	
     public void setTimerSign(Location loc,String hour,String minute,String seconde,String mili,String name) {
         Sign TimerSign = (Sign)loc.getBlock().getState();
         TimerSign.setLine(1, "Time");

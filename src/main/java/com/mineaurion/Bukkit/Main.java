@@ -1,20 +1,30 @@
-package com.mineaurion.minejump;
+package com.mineaurion.Bukkit;
 
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import com.mineaurion.minejump.command.CommandCheckpoint;
+import com.mineaurion.Bukkit.command.CommandCheckpoint;
+import com.mineaurion.Bukkit.command.CommandStopJump;
 
 public class Main extends JavaPlugin {
 	
 	public Jump jumpClass;
 	public Main instance=null;
-	public String test = "test";
+	public MySQLEngine mysqlEngine;
+	
+	
+	
+	FileConfiguration config;
+
+	
+	
 	
 	//Boot du plugin il executera cela pour bukkit :
 	@SuppressWarnings("deprecation")
@@ -46,19 +56,33 @@ public class Main extends JavaPlugin {
 	}
 
 	public void initDatabase() {
-		// 
+		if(config.getString("Database.Address").equalsIgnoreCase("none")) {
+			sendmessage("{{DARK_RED}}Configure le plugin","console");
+		}else {
+			sendmessage("{{GOLD}}Loading DataBase", "console");
+			try {
+				mysqlEngine = new MySQLEngine(instance);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 
 	public void initCommand() {
 		
 		getCommand("checkpoint").setExecutor(new CommandCheckpoint(instance));
+		getCommand("stopjump").setExecutor(new CommandStopJump(instance));
 	}
 
 	public void initConfig() {
-		// +
+		getConfig().options().copyDefaults(true);
+		saveDefaultConfig();
+		config = instance.getConfig();
+		saveConfig();
 		
 	}
+	
 	
 	public String prefix = "{{GREEN}}[{{YELLOW}}MineaurionJump{{GREEN}}]{{RESET}} ";
 	

@@ -1,8 +1,9 @@
-name: Minejump
+name: MineJump
 version: 1.0
-author: Gaetann18
-main: com.mineaurion.minejump.Main
+author: Gaetann18/THEJean_Kevin
+main: com.mineaurion.Bukkit.Main
 commands:
     checkpoint:
       description: Tp to last checkpoint
-
+    stopjump:
+      description: To stop timer and jump

@@ -1,4 +1,4 @@
-package com.mineaurion.minejump.command;
+package com.mineaurion.Bukkit.command;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
-import com.mineaurion.minejump.Main;
+import com.mineaurion.Bukkit.Main;
 
 public class CommandCheckpoint implements CommandExecutor {
 	Main plugin;

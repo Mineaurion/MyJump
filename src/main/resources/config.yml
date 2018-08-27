@@ -1,0 +1,8 @@
+timeMinimum: 30
+Database:
+    Address: blackbird.mineaurion.com
+    Port: 3306
+    Username: jean_kevin
+    Password: CKdCS99EBE
+    Db: jeankevin
+    Prefix: jump

@@ -1,4 +1,4 @@
-package com.mineaurion.minejump;
+package com.mineaurion.Bukkit;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,17 +22,22 @@ public class EventManager implements Listener {
 	@EventHandler
 	public void JoueursMarcheEvent(PlayerInteractEvent event) {
 		if(event.getAction().equals(Action.PHYSICAL)) {
-			Player playerplate = event.getPlayer();
+			Player player = event.getPlayer();
 			if(event.getClickedBlock().getType().equals(Material.GOLD_PLATE)) {
 				Block bunder = event.getClickedBlock().getLocation().subtract(0.0D,1.0D,0.0D).getBlock();
 				if(bunder != null && bunder.getType().equals(Material.LAPIS_BLOCK)) {
+					if(plugin.mysqlEngine.isBannedPlayer(player.getUniqueId().toString())) {
+						plugin.sendmessage("{{RED}}Le jump est pas autorisé au tricheur", player.getName());
+						player.teleport(player.getWorld().getSpawnLocation());
+						return;
+					}
 					Location location = event.getClickedBlock().getLocation().add(0.0D,1.0D,0.0D);
-					plugin.jumpClass.startJump(playerplate,location);
-				} else if(bunder != null && bunder.getType().equals(Material.EMERALD_BLOCK) && plugin.jumpClass.hasStartedJump(playerplate)) {
+					plugin.jumpClass.startJump(player,location);
+				} else if(bunder != null && bunder.getType().equals(Material.EMERALD_BLOCK) && plugin.jumpClass.hasStartedJump(player)) {
 					Location location = event.getClickedBlock().getLocation().add(0.0D,1.0D,0.0D);
-					plugin.jumpClass.setCheckpointJump(playerplate,location,playerplate.getVelocity());
-				} else if(bunder != null && bunder.getType().equals(Material.DIAMOND_BLOCK) && plugin.jumpClass.hasStartedJump(playerplate)) {
-					plugin.jumpClass.stopJump(playerplate,true);
+					plugin.jumpClass.setCheckpointJump(player,location,player.getVelocity());
+				} else if(bunder != null && bunder.getType().equals(Material.DIAMOND_BLOCK) && plugin.jumpClass.hasStartedJump(player)) {
+					plugin.jumpClass.stopJump(player,true);
 				}
 			}
 		}
@@ -40,13 +45,12 @@ public class EventManager implements Listener {
 	
 	@EventHandler
 	public void SupprCmdHome(PlayerCommandPreprocessEvent event) {
-		if(event.getMessage().contains("/sethome") && plugin.jumpClass.hasStartedJump(event.getPlayer())) {
-			event.setCancelled(true);
-		}else if(event.getMessage().contains("/fly") && plugin.jumpClass.hasStartedJump(event.getPlayer())) {
-			event.setCancelled(true);
-		}else if(event.getMessage().contains("/home") && plugin.jumpClass.hasStartedJump(event.getPlayer())) {
-			event.setCancelled(true);
-		}if(event.getMessage().contains("/homes") && plugin.jumpClass.hasStartedJump(event.getPlayer())) {
+		if((event.getMessage().contains("/sethome") 
+				|| event.getMessage().contains("/fly")
+				|| event.getMessage().contains("/home")
+				|| event.getMessage().contains("/back")
+				|| event.getMessage().contains("/tp"))
+				&& plugin.jumpClass.hasStartedJump(event.getPlayer())) {
 			event.setCancelled(true);
 		}
 	}
