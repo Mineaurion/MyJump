@@ -1,5 +1,7 @@
 package com.mineaurion.Bukkit;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -48,6 +50,7 @@ public class Jump {
 			MainClass.getServer().dispatchCommand(MainClass.getServer().getConsoleSender(), "fly "+name+" off");
 			crono.put(name, System.currentTimeMillis());
 			checkpoint.put(name,location);
+			checkpointRot.put(name, player.getLocation().getDirection());
 			MainClass.sendmessage("{{BLUE}}Timer lancé", name);
 			MainClass.sendmessage("{{BLUE}}A toi de jouer, bonne chance", name);
 			MainClass.sendmessage("{{BLUE}}Tu a accès au {{RED}}/checkpoint {{BLUE}} pour retourner au checkpoint", name);
@@ -119,7 +122,7 @@ public class Jump {
 
 	public void setCheckpointPlayer(Player player) {
 		if(checkpoint.containsKey(player.getName())) {
-			Location location = checkpoint.get(player.getName()).add(0.5D,0.5D,0.5D).setDirection(checkpointRot.get(player.getName()));
+			Location location = checkpoint.get(player.getName()).add(0.5D,0D,0.5D).setDirection(checkpointRot.get(player.getName()));
 			player.teleport(location);
 			
 		}else {
@@ -220,40 +223,46 @@ public class Jump {
 	
 	public void updateLeader(Player player) {
 		int i = 1;
-		HashMap<String, Integer> top = MainClass.mysqlEngine.getThirdPlayer();
-		Iterator<Entry<String, Integer>> it = top.entrySet().iterator();
-		while(it.hasNext()) {
-			Map.Entry<String,Integer> pair = (Map.Entry<String,Integer>)it.next();
-			String name = pair.getKey();
-			Integer timestamp = pair.getValue();
-			
-			String mili = String.valueOf((int) (timestamp%1000));
-			String seconde = String.valueOf((int) (timestamp / 1000) % 60 );
-			String minute = String.valueOf((int) ((timestamp / (1000*60)) % 60));
-			String hour   = String.valueOf((int) ((timestamp / (1000*60*60)) % 24));
-			
-			Location locTimerSign = null;
-			Location locPlayerHead = null;
-			switch(i){
+		ResultSet top = MainClass.mysqlEngine.getThirdPlayer();
+		try {
+			while(top.next()) {
+				int timestamp = top.getInt("time");
+				String name = top.getString("name");
 				
-				case 1:
-					locTimerSign = new Location(player.getWorld(), 70, 73, -68);
-		            locPlayerHead = new Location(player.getWorld(), 70, 74, -69);
-					break;
-				case 2:
-					locTimerSign = new Location(player.getWorld(), 69, 72, -68);
-		            locPlayerHead = new Location(player.getWorld(), 69, 73, -69);
-		            
-					break;
-				case 3:
-					locTimerSign = new Location(player.getWorld(), 71, 72, -68);
-		            locPlayerHead = new Location(player.getWorld(), 71, 73, -69);
-					break;
+				
+				String mili = String.valueOf((int) (timestamp%1000));
+				String seconde = String.valueOf((int) (timestamp / 1000) % 60 );
+				String minute = String.valueOf((int) ((timestamp / (1000*60)) % 60));
+				String hour   = String.valueOf((int) ((timestamp / (1000*60*60)) % 24));
+				
+				Location locTimerSign = null;
+				Location locPlayerHead = null;
+				switch(i){
+					//premier
+					case 1:
+						locTimerSign = new Location(player.getWorld(), 70, 73, -68);
+			            locPlayerHead = new Location(player.getWorld(), 70, 74, -69);
+						break;
+					//deuxieme
+					case 2:
+						locTimerSign = new Location(player.getWorld(), 69, 72, -68);
+			            locPlayerHead = new Location(player.getWorld(), 69, 73, -69);
+						break;
+					//troisième
+					case 3:
+						locTimerSign = new Location(player.getWorld(), 71, 72, -68);
+			            locPlayerHead = new Location(player.getWorld(), 71, 73, -69);
+						break;
+				}
+				setTimerSign(locTimerSign,hour,minute,seconde,mili,name);
+				spawnHeadBlock(locPlayerHead, name, "SOUTH");
+				
+				i++;
 			}
-			setTimerSign(locTimerSign,hour,minute,seconde,mili,name);
-			spawnHeadBlock(locPlayerHead, name, "SOUTH");
-			
-			i++;
+			top.getStatement().close();
+			top.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 	}
 	

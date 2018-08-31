@@ -7,3 +7,4 @@ commands:
       description: Tp to last checkpoint
     stopjump:
       description: To stop timer and jump
+    updatescore:

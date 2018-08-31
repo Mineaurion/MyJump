@@ -35,7 +35,7 @@ public class EventManager implements Listener {
 					plugin.jumpClass.startJump(player,location);
 				} else if(bunder != null && bunder.getType().equals(Material.EMERALD_BLOCK) && plugin.jumpClass.hasStartedJump(player)) {
 					Location location = event.getClickedBlock().getLocation().add(0.0D,1.0D,0.0D);
-					plugin.jumpClass.setCheckpointJump(player,location,player.getVelocity());
+					plugin.jumpClass.setCheckpointJump(player,location,player.getLocation().getDirection());
 				} else if(bunder != null && bunder.getType().equals(Material.DIAMOND_BLOCK) && plugin.jumpClass.hasStartedJump(player)) {
 					plugin.jumpClass.stopJump(player,true);
 				}

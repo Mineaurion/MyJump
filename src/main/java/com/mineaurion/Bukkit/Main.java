@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import com.mineaurion.Bukkit.command.CommandCheckpoint;
 import com.mineaurion.Bukkit.command.CommandStopJump;
+import com.mineaurion.Bukkit.command.CommandUpdate;
 
 public class Main extends JavaPlugin {
 	
@@ -73,6 +74,7 @@ public class Main extends JavaPlugin {
 		
 		getCommand("checkpoint").setExecutor(new CommandCheckpoint(instance));
 		getCommand("stopjump").setExecutor(new CommandStopJump(instance));
+		getCommand("updatescore").setExecutor(new CommandUpdate(instance));
 	}
 
 	public void initConfig() {
