@@ -1,5 +1,5 @@
 name: MyJump
-version: @version@
+version: 2
 main: com.mineaurion.Main
 prefix: MineJump
 load: STARTUP
@@ -10,6 +10,9 @@ website: mineaurion.com
 commands:
   checkpoint:
     description: Tp to last checkpoint
+    permission: jump.checkpoint
+    usage: "Tp to last checkpoint"
   stopjump:
     description: To stop timer and jump
-  updatescore:
+    permission: jump.stopjump
+    usage: "To stop timer and jump"

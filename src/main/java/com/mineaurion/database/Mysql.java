@@ -1,4 +1,4 @@
-package com.mineaurion;
+package com.mineaurion.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,45 +6,53 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.mineaurion.Main;
+import org.bukkit.ChatColor;
 
-public class MySQLEngine {
+public class Mysql {
+    private static Mysql _instance = null;
     private Main plugin;
-    public String address;
-    public String port;
-    public String databaseName;
-    public String user;
-    public String password;
-    public String prefix;
+    private String address;
+    private String port;
+    private String databaseName;
+    private String user;
+    private String password;
+    private String prefix;
     private Connection connection;
 
-    public MySQLEngine(Main main) throws ClassNotFoundException, SQLException {
-        plugin = main;
-        address = plugin.config.getString("Database.Address");
-        port = plugin.config.getString("Database.Port");
-        databaseName = plugin.config.getString("Database.Db");
-        user = plugin.config.getString("Database.Username");
-        password = plugin.config.getString("Database.Password");
-        prefix = plugin.config.getString("Database.Prefix");
-
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
+    public static Mysql getInstance() {
+        System.out.println("CREATED DB");
+        if (_instance == null) {
+            try {
+                return new Mysql();
+            } catch (ClassNotFoundException | SQLException e) {
+                e.printStackTrace();
+            }
         }
+        return _instance;
+    }
+
+    public Mysql() throws ClassNotFoundException, SQLException {
+        plugin = Main.getInstance();
+        address = plugin.getConfig().getString("database.host");
+        port = plugin.getConfig().getString("database.port");
+        databaseName = plugin.getConfig().getString("database.db");
+        user = plugin.getConfig().getString("database.username");
+        password = plugin.getConfig().getString("database.password");
+        prefix = plugin.getConfig().getString("database.prefix");
 
         Class.forName("com.mysql.jdbc.Driver");
-        connection = DriverManager.getConnection(
-                "jdbc:mysql://" + address + ":" + port + "/" + databaseName + "?autoReconnect=true", user, password);
-        connection
-                .prepareStatement("CREATE TABLE IF NOT EXISTS `" + prefix + "leader` ( "
+
+        connection = DriverManager.getConnection("jdbc:mysql://" + address + ":" + port + "/" + databaseName + "?autoReconnect=true", user, password);
+        connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + prefix + "leader` ( "
                         + "`uuid` VARCHAR(50) NOT NULL , " + "`name` VARCHAR(100) NOT NULL , "
                         + "`time` INT NOT NULL , " + "PRIMARY KEY (`uuid`)" + ") ENGINE = InnoDB CHARSET=utf8;")
                 .execute();
 
-        connection
-                .prepareStatement("CREATE TABLE IF NOT EXISTS `" + prefix + "banned` ( "
+        connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + prefix + "banned` ( "
                         + "`uuid` VARCHAR(50) NOT NULL , " + "`name` VARCHAR(100) NOT NULL , "
                         + "`time` INT NOT NULL , " + "PRIMARY KEY (`uuid`)" + ") ENGINE = InnoDB CHARSET=utf8;")
                 .execute();
-
+        _instance = this;
     }
 
     public void setScorePlayer(String uuid, String name, int time) {
@@ -61,7 +69,7 @@ public class MySQLEngine {
                 updateScorePlayer(uuid, name, time);
             }
         } catch (SQLException e) {
-            plugin.sendmessage("{{DARK_RED}}" + e.getStackTrace().toString(), "console");
+            plugin.sendMessage(ChatColor.BLUE + e.getStackTrace().toString(), "console");
             e.printStackTrace();
         }
     }
@@ -77,7 +85,7 @@ public class MySQLEngine {
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
-            plugin.sendmessage("{{DARK_RED}}" + e.getStackTrace().toString(), "console");
+            plugin.sendMessage(ChatColor.DARK_RED + e.getStackTrace().toString(), "console");
             e.printStackTrace();
         }
     }
@@ -93,7 +101,7 @@ public class MySQLEngine {
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
-            plugin.sendmessage("{{DARK_RED}}" + e.getStackTrace().toString(), "console");
+            plugin.sendMessage(ChatColor.DARK_RED + e.getStackTrace().toString(), "console");
             e.printStackTrace();
         }
     }
@@ -113,7 +121,7 @@ public class MySQLEngine {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            plugin.sendmessage("{{DARK_RED}}" + e.getStackTrace().toString(), "console");
+            plugin.sendMessage(ChatColor.DARK_RED + e.getStackTrace().toString(), "console");
         }
         return false;
     }
@@ -127,7 +135,7 @@ public class MySQLEngine {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            plugin.sendmessage("{{DARK_RED}}" + e.getStackTrace().toString(), "console");
+            plugin.sendMessage(ChatColor.DARK_RED + e.getStackTrace().toString(), "console");
         }
         return null;
     }

@@ -1,10 +1,23 @@
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group = pluginGroup
 version = pluginVersion
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+    }
+}
+
 
 repositories {
     mavenCentral()
@@ -23,6 +36,7 @@ dependencies {
     compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
 }
 
+
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
@@ -30,3 +44,20 @@ processResources {
         filter ReplaceTokens, tokens: [version: version]
     }
 }
+
+
+
+shadowJar {
+    dependencies {
+
+    }
+}
+
+task installJar(type: Copy) {
+    from "./build/libs/MyJump-" + version + "-all.jar"
+    into 'D:/telechargement/serveur local spigot/plugins'
+}
+
+installJar.dependsOn shadowJar;
+installJar.mustRunAfter(shadowJar);
+
