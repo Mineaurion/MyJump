@@ -1,0 +1,8 @@
+timeMinimum: 30
+Database:
+  Address: ''
+  Port: ''
+  Username: ''
+  Password: ''
+  Db: ''
+  Prefix: ''

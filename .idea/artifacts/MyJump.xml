@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MyJump">
+    <output-path>D:/telchargement/serveur local spigot/plugins</output-path>
+    <root id="archive" name="MyJump.jar">
+      <element id="module-output" name="MyJump.MyJump.main" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/config.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/plugin.yml" />
+    </root>
+  </artifact>
+</component>

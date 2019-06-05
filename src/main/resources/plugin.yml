@@ -1,0 +1,15 @@
+name: MyJump
+version: @version@
+main: com.mineaurion.Main
+prefix: MineJump
+load: STARTUP
+authors: [Gatann18]
+description: plugin de jump
+website: mineaurion.com
+
+commands:
+  checkpoint:
+    description: Tp to last checkpoint
+  stopjump:
+    description: To stop timer and jump
+  updatescore:
