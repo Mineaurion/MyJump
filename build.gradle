@@ -36,7 +36,6 @@ dependencies {
     compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
 }
 
-
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
@@ -44,8 +43,6 @@ processResources {
         filter ReplaceTokens, tokens: [version: version]
     }
 }
-
-
 
 shadowJar {
     dependencies {
@@ -56,6 +53,11 @@ shadowJar {
 task installJar(type: Copy) {
     from "./build/libs/MyJump-" + version + "-all.jar"
     into 'D:/telechargement/serveur local spigot/plugins'
+}
+
+task installJarAshk(type: Copy) {
+    from "./build/libs/MyJump-" + version + "-all.jar"
+    into 'C:/Users/Ashk/Desktop/Mineaurion/Server/Spigot/plugins'
 }
 
 installJar.dependsOn shadowJar;
