@@ -1,8 +1,8 @@
-package events;
+package com.mineaurion.events;
 
 import com.mineaurion.Jump;
+import com.mineaurion.Jumper;
 import com.mineaurion.Main;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -37,23 +37,14 @@ public class OnPlayerInteract implements Listener {
         Material checkBlock = Material.EMERALD_BLOCK;
         Material endBlock = Material.DIAMOND_BLOCK;
 
-        // START JUMP
-        if(bunder.getType().equals(startBlock)) {
-            jump.start(player);
-        }
-        /*
-        // CHECKPOINT JUMP (WHILE RUNNING)
-        if(bunder.getType().equals(checkBlock) && plugin.jumpClass.hasStartedJump(player)) {
-            Location location = event.getClickedBlock().getLocation().add(0.0D,1.0D,0.0D);
-            plugin.jumpClass.setCheckpointJump(player,location,player.getLocation().getDirection());
-        }
+        boolean exist = Jump.getInstance().jumperExist(player.getName());
 
-        // END JUMP (WHILE RUNNING)
-        if(bunder.getType().equals(endBlock)) {
-            plugin.jumpClass.stopJump(player,true);
-        }
-        */
-
+        if (bunder.getType().equals(startBlock) && !exist)
+            new Jumper(player.getName()).start();
+        if (bunder.getType().equals(checkBlock) && exist)
+            jump.getJumper(player.getName()).update(event.getClickedBlock().getLocation());
+        if (bunder.getType().equals(endBlock) && exist)
+            jump.getJumper(player.getName()).stop(true);
     }
 
 }

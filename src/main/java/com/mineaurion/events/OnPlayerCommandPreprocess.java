@@ -1,12 +1,10 @@
-package events;
+package com.mineaurion.events;
 
 import com.mineaurion.Jump;
 import com.mineaurion.Main;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 
 public class OnPlayerCommandPreprocess implements Listener {
     private Main plugin;

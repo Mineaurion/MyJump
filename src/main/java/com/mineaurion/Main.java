@@ -1,7 +1,7 @@
 package com.mineaurion;
 
 import com.mineaurion.database.Mysql;
-import events.OnPlayerInteract;
+import com.mineaurion.events.OnPlayerInteract;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 
@@ -33,6 +33,7 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        jump.clear();
         sendMessage("End plugin");
     }
 
@@ -40,6 +41,7 @@ public final class Main extends JavaPlugin {
         initConfig();
         initEvents();
         initCommands();
+        jump = Jump.getInstance();
     }
 
     private void initConfig() {

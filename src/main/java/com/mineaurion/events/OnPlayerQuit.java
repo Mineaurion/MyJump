@@ -1,12 +1,9 @@
-package events;
+package com.mineaurion.events;
 
 import com.mineaurion.Jump;
 import com.mineaurion.Main;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class OnPlayerQuit implements Listener {
@@ -20,6 +17,7 @@ public class OnPlayerQuit implements Listener {
 
     @EventHandler
     public void handler(PlayerQuitEvent event) {
-        //jump.stopJump(event.getPlayer(),false);
+        if (jump.jumperExist(event.getPlayer().getName()))
+            jump.getJumper(event.getPlayer().getName()).stop(false);
     }
 }

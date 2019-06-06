@@ -45,21 +45,24 @@ processResources {
 }
 
 shadowJar {
+    archiveName = "Jump-${version}.jar"
     dependencies {
 
     }
 }
 
 task installJar(type: Copy) {
-    from "./build/libs/MyJump-" + version + "-all.jar"
+    from "./build/libs/Jump-${version}.jar"
     into 'D:/telechargement/serveur local spigot/plugins'
 }
 
 task installJarAshk(type: Copy) {
-    from "./build/libs/MyJump-" + version + "-all.jar"
+    from "./build/libs/Jump-${version}.jar"
     into 'C:/Users/Ashk/Desktop/Mineaurion/Server/Spigot/plugins'
 }
 
 installJar.dependsOn shadowJar;
 installJar.mustRunAfter(shadowJar);
 
+installJarAshk.dependsOn shadowJar;
+installJarAshk.mustRunAfter(shadowJar);
