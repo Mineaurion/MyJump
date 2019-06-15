@@ -6,6 +6,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
+import java.sql.SQLException;
+
 public class OnPlayerCommandPreprocess implements Listener {
     private Main plugin;
     private Jump jump;
@@ -22,7 +24,7 @@ public class OnPlayerCommandPreprocess implements Listener {
                 || event.getMessage().contains("/home")
                 || event.getMessage().contains("/back")
                 || event.getMessage().contains("/tp"))
-                /*&& jump.hasStartedJump(event.getPlayer())*/) {
+                && jump.jumperExist(event.getPlayer().getName())) {
             event.setCancelled(true);
         }
 

@@ -1,24 +1,34 @@
 package com.mineaurion;
 
-import com.mineaurion.database.Mysql;
 import com.mineaurion.events.OnPlayerInteract;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
-
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Map;
 
 public final class Main extends JavaPlugin {
 
     private static Main _instance = null;
-    public Mysql db;
-    public Jump jump;
+    private static boolean debug = true;
+    private Jump jump;
     private int commandCount = 0;
     private int commandIgnoredCount = 0;
 
-    public Main() {
+    public Main() throws IOException, SQLException {
         super();
         _instance = this;
-        db = Mysql.getInstance();
+    }
+
+    public static void debugMap(Map<String, Integer> map, String playerName) {
+        if (!debug)
+            return;
+        Player p = Bukkit.getPlayer(playerName);
+        map.forEach((name , time)-> {
+            p.sendMessage("NAME = " + name + " TIME = " + time);
+        });
     }
 
     public static Main getInstance() {
@@ -29,6 +39,7 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         sendMessage("Start plugin... ");
         this.init();
+        jump = Jump.getInstance().init();
     }
 
     @Override
@@ -41,7 +52,6 @@ public final class Main extends JavaPlugin {
         initConfig();
         initEvents();
         initCommands();
-        jump = Jump.getInstance();
     }
 
     private void initConfig() {

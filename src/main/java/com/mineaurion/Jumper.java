@@ -1,21 +1,26 @@
 package com.mineaurion;
 
+import com.mineaurion.database.Mysql;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.util.Vector;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class Jumper {
     private Main plugin;
     private String name;
+    private String uuid;
     private ArrayList<Location> checkpoints = new ArrayList<Location>();
     private long start_time;
     private long end_time;
@@ -32,20 +37,49 @@ public class Jumper {
         name = playerName;
         start_time = new Date().getTime();
 
-        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), "fly " + name + " off");
-        plugin.sendMessage(ChatColor.BLUE + "Jump start", name);
-        plugin.sendMessage(ChatColor.BLUE + "C'est parti!", name);
-
         Jump.getInstance().addJumper(this);
     }
 
+    public boolean isZorinova() {
+        return (name.toLowerCase().equals("zorinova") || Bukkit.getPlayer(name).getUniqueId().toString().equals("74285c05-8ed4-4c24-baa0-f0cca33d29e9"));
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean hasCheckpoints() {
+        return (!checkpoints.isEmpty());
+    }
+
+    public void goToCheckpoint() {
+        Location cp = checkpoints.get(checkpoints.size() - 1);
+        Player player = Bukkit.getPlayer(name);
+
+        player.teleport(cp);
+    }
+
     public void start() {
+        Main.debugMap(Jump.getInstance().getScores(), name);
+        if (isBan()) {
+            plugin.sendMessage(ChatColor.RED + "Tu es ban du parcours...", name);
+            stop(false);
+            return;
+        }
+
         Scoreboard sb = Bukkit.getScoreboardManager().getNewScoreboard();
         Objective objective = sb.registerNewObjective("timer", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName("Chronometre");
 
         Bukkit.getPlayer(name).setScoreboard(sb);
+
+        if (isZorinova())
+            plugin.sendMessage(ChatColor.DARK_AQUA + "Zorinova :"+ ChatColor.WHITE +" joueur de type enfant", name);
+
+        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), "fly " + name + " off");
+        plugin.sendMessage(ChatColor.BLUE + "Jump start", name);
+        plugin.sendMessage(ChatColor.BLUE + "C'est parti!", name);
 
         new BukkitRunnable() {
             public void run() {
@@ -64,11 +98,20 @@ public class Jumper {
 
     public void stop(boolean end) {
         Bukkit.getPlayer(name).setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-        plugin.sendMessage(ChatColor.RED + "Jump stop", name);
         isRunning = false;
         if (end) {
             end_time = new Date().getTime();
-            plugin.sendMessage(getTimer(), name);
+            int time = (int) end_time - (int) start_time;
+            if (!valideTime(time)) {
+                ban();
+                plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu viens de te prendre un ban sur le parcours :)!", name);
+            }
+            else {
+                save(time);
+                plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu as fini le parcours!", name);
+            }
+
+            plugin.sendMessage("Ton temps final : " + getTimer(), name);
         }
         Jump.getInstance().removeJumper(name);
     }
@@ -78,8 +121,68 @@ public class Jumper {
             if (oldCheckpoint.distance(newCheckpoint) == 0)
                 return;
 
+        Vector direction = Bukkit.getPlayer(name).getLocation().getDirection();
+        newCheckpoint.setDirection(direction);
+
         checkpoints.add(newCheckpoint);
+
+        if (isZorinova())
+            plugin.sendMessage(ChatColor.DARK_AQUA + "Zorinova lache rien petit gars!");
         plugin.sendMessage(getTimer(), name);
+    }
+
+    private void save(int time) {
+        final String INSERT = "INSERT INTO scores (uuid, name, time, created_at) VALUES (?,?,?,?)";
+        Connection conn = Mysql.getConnection();
+        if (conn == null)
+            return;
+
+        String uuid = Bukkit.getPlayer(name).getUniqueId().toString();
+        try (PreparedStatement preparedStatement = conn.prepareStatement(INSERT)) {
+            preparedStatement.setString(1, uuid);
+            preparedStatement.setString(2, name);
+            preparedStatement.setInt(3, time);
+            preparedStatement.setDate(4, new java.sql.Date(start_time));
+            preparedStatement.executeUpdate();
+
+            Jump.getInstance().addScore(name, time);
+            plugin.sendMessage("Player " + name + " (" + uuid + ") with time " + getTimer() + " saved in DB");
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean valideTime(int time) {
+        int min = plugin.getConfig().getInt("jump.minSeconds");
+        return (time / 1000) >= min;
+    }
+
+    private boolean isBan() {
+        return Jump.getInstance().getBanned().contains(name);
+    }
+
+    private void ban() {
+        final String INSERT = "INSERT INTO banned (uuid, name, created_at) VALUES (?,?,?)";
+        Connection conn = Mysql.getConnection();
+        if (conn == null)
+            return;
+
+        String uuid = Bukkit.getPlayer(name).getUniqueId().toString();
+        try (PreparedStatement preparedStatement = conn.prepareStatement(INSERT)) {
+            preparedStatement.setString(1, uuid);
+            preparedStatement.setString(2, name);
+            preparedStatement.setDate(  3, new java.sql.Date(new Date().getTime()));
+            preparedStatement.executeUpdate();
+
+            Jump.getInstance().addBanned(name);
+            plugin.sendMessage("Player " + name + " (" + uuid + ") has been banned! Time info : " + getTimer());
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private String getTimer() {
@@ -101,37 +204,5 @@ public class Jumper {
         _hour.setScore(hours);
         _min.setScore(minutes);
         _sec.setScore(seconds);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public ArrayList<Location> getCheckpoints() {
-        return checkpoints;
-    }
-
-    public void setCheckpoints(ArrayList<Location> locations) {
-        this.checkpoints = locations;
-    }
-
-    public long getStart_time() {
-        return start_time;
-    }
-
-    public void setStart_time(long start_time) {
-        this.start_time = start_time;
-    }
-
-    public long getEnd_time() {
-        return end_time;
-    }
-
-    public void setEnd_time(long end_time) {
-        this.end_time = end_time;
     }
 }

@@ -1,13 +1,13 @@
-timeMinimum: 30
+jump:
+  minSeconds: 30
+  ladders:
+    x: 391
+    y: 69
+    z: 106
+    d: 'WEST'
 database:
   host: 'localhost'
   port: '3306'
   username: 'root'
   password: 'root'
   db: 'jump'
-  prefix: 'jump_'
-jump:
-  top:
-    x:
-    y:
-    z:
