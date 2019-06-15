@@ -3,7 +3,7 @@ version: 2
 main: com.mineaurion.Main
 prefix: MineJump
 load: STARTUP
-authors: [Gatann18]
+authors: [Ashk2a, Gaetann18]
 description: plugin de jump
 website: mineaurion.com
 

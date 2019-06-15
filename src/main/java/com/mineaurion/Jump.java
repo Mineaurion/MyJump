@@ -3,13 +3,8 @@ package com.mineaurion;
 import com.mineaurion.database.Mysql;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
-
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -35,7 +30,6 @@ public class Jump {
         _instance = this;
         loadBannedPlayers();
         loadBestScoresPlayers();
-        spawnLadders();
     }
 
     public static Jump getInstance() {
@@ -77,13 +71,12 @@ public class Jump {
     public void cpItemInteract(PlayerInteractEvent event) {
         event.setCancelled(true);
 
-        ItemStack item = event.getItem();
         Player player = event.getPlayer();
 
         boolean exist = jumperExist(player.getName());
 
         if (!exist) {
-            player.sendMessage(ChatColor.RED + "Tu n'as pas encore dÃ©marrer le jump!");
+            player.sendMessage(ChatColor.RED + "Tu n'as pas encore démarrer le jump!");
             return;
         }
 
@@ -99,9 +92,11 @@ public class Jump {
 
 
     public void clear() {
-        for (String key : jumpers.keySet()) {
-            jumpers.get(key).stop(false);
-            jumpers.remove(key);
+        if (jumpers.size() > 0) {
+            for (String key : jumpers.keySet()) {
+                jumpers.get(key).stop(false);
+                jumpers.remove(key);
+            }
         }
     }
 
@@ -144,15 +139,6 @@ public class Jump {
         sortScores();
     }
 
-    public HashMap<String, Integer> getThirdTopScores() {
-        HashMap<String, Integer> top = new HashMap<String, Integer>();
-        scores.forEach((name, time) -> {
-            if (top.size() < 3)
-                top.put(name, time);
-        });
-        return top;
-    }
-
     private void sortScores() {
         class ScoresSort implements Comparator<Map.Entry<String, Integer>> {
             public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
@@ -168,72 +154,6 @@ public class Jump {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
         scores = sortedMap;
-    }
-
-    private void spawnLadders() {
-        double x = plugin.getConfig().getDouble("jump.ladders.x");
-        double y = plugin.getConfig().getDouble("jump.ladders.y");
-        double z = plugin.getConfig().getDouble("jump.ladders.z");
-
-        Location location = new Location(Bukkit.getWorld("world"), x, y, z);
-        spawnBaseBlock(location);
-    }
-
-    private void spawnBaseBlock(Location location) {
-        Block base = location.getBlock();
-        Block first = location.clone().add(0, 1, 0).getBlock();
-        Block second;
-        Block third;
-
-        String direction = plugin.getConfig().getString("jump.ladders.d");
-
-        switch (direction) {
-            case "WEST":
-                second = location.clone().subtract(0, 0, 1).getBlock();
-                third = location.clone().add(0, 0, 1).getBlock();
-                break;
-            case "EAST":
-                second = location.clone().add(0, 0, 1).getBlock();
-                third = location.clone().subtract(0, 0, 1).getBlock();
-                break;
-            case "SOUTH":
-                second = location.clone().subtract(1, 0, 0).getBlock();
-                third = location.clone().add(1, 0, 0).getBlock();
-                break;
-            case "NORTH":
-                second = location.clone().add(1, 0, 0).getBlock();
-                third = location.clone().subtract(1, 0, 0).getBlock();
-                break;
-            default:
-                return;
-        }
-        base.setType(Material.WOOD);
-        first.setType(Material.DIAMOND_BLOCK);
-        second.setType(Material.GOLD_BLOCK);
-        third.setType(Material.IRON_BLOCK);
-        spawnHeadSign(first, second, third);
-    }
-
-    private void spawnHeadSign(Block first, Block second, Block third) {
-        ArrayList<Block> blocks = new ArrayList<Block>();
-        blocks.add(first);
-        blocks.add(second);
-        blocks.add(third);
-
-        int index = 0;
-        final String direction = plugin.getConfig().getString("jump.ladders.d");
-
-        for(Map.Entry<String, Integer> entry : getThirdTopScores().entrySet()) {
-            Location tmp = blocks.get(index).getLocation().add(0, 1, 0);
-            Block current = tmp.getBlock();
-            current.setType(Material.SKULL);
-            Skull skull = (Skull)current.getState();
-            skull.setSkullType(SkullType.PLAYER);
-            skull.setOwner(entry.getKey());
-            skull.setRotation(BlockFace.valueOf(direction));
-            skull.update(true);
-            index++;
-        }
     }
 
     private void loadBannedPlayers() {

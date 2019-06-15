@@ -20,6 +20,7 @@ public final class Main extends JavaPlugin {
     public Main() throws IOException, SQLException {
         super();
         _instance = this;
+        jump = Jump.getInstance().init();
     }
 
     public static void debugMap(Map<String, Integer> map, String playerName) {
@@ -39,7 +40,6 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         sendMessage("Start plugin... ");
         this.init();
-        jump = Jump.getInstance().init();
     }
 
     @Override

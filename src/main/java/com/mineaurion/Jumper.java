@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -104,11 +103,11 @@ public class Jumper {
             int time = (int) end_time - (int) start_time;
             if (!valideTime(time)) {
                 ban();
-                plugin.sendMessage(ChatColor.DARK_AQUA + "Bien jouÃ© !" + ChatColor.WHITE + " Tu viens de te prendre un ban sur le parcours :)!", name);
+                plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu viens de te prendre un ban sur le parcours :)!", name);
             }
             else {
                 save(time);
-                plugin.sendMessage(ChatColor.DARK_AQUA + "Bien jouÃ© !" + ChatColor.WHITE + " Tu as fini le parcours!", name);
+                plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu as fini le parcours!", name);
             }
 
             plugin.sendMessage("Ton temps final : " + getTimer(), name);
