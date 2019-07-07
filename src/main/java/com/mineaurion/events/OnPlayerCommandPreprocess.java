@@ -25,6 +25,7 @@ public class OnPlayerCommandPreprocess implements Listener {
                 || event.getMessage().contains("/back")
                 || event.getMessage().contains("/tp"))
                 && jump.jumperExist(event.getPlayer().getName())) {
+            event.getPlayer().sendMessage("Tu ne peux pas faire cette commande pendant le parcours!");
             event.setCancelled(true);
         }
 

@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -20,6 +21,7 @@ public class Jumper {
     private Main plugin;
     private String name;
     private String uuid;
+    private BukkitTask task = null;
     private ArrayList<Location> checkpoints = new ArrayList<Location>();
     private long start_time;
     private long end_time;
@@ -75,51 +77,40 @@ public class Jumper {
         Bukkit.getPlayer(name).setScoreboard(sb);
 
         if (isZorinova())
-            plugin.sendMessage(ChatColor.DARK_AQUA + "Zorinova :"+ ChatColor.WHITE +" joueur de type enfant commence le parcous", name);
+            plugin.sendMessage(ChatColor.DARK_AQUA + "Zorinova :" + ChatColor.WHITE + " joueur de type enfant commence le parcous", name);
 
         plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), "fly " + name + " off");
         plugin.sendMessage(ChatColor.DARK_AQUA + "Jump start", name);
         plugin.sendMessage(ChatColor.DARK_AQUA + "C'est parti!", name);
-
-        new BukkitRunnable() {
+        task = new BukkitRunnable() {
             public void run() {
+                long now = new Date().getTime();
+                long diff = now - Jumper.this.start_time;
 
-                if (!Jumper.this.isRunning)
-                    this.cancel();
-                else {
-                    long now = new Date().getTime();
-                    long diff = now - Jumper.this.start_time;
-
-                    Jumper.this.setTimer(diff);
-                }
+                Jumper.this.setTimer(diff);
             }
-
         }.runTaskTimer(plugin, 0, 1);
     }
 
     public void stop(boolean end) {
+        if (task != null)
+            task.cancel();
         Bukkit.getPlayer(name).setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-        isRunning = false;
+        Jump.getInstance().removeJumper(name);
         if (end) {
             end_time = new Date().getTime();
             int time = (int) end_time - (int) start_time;
-            if (isBan()) {
-                Jump.getInstance().removeJumper(name);
-                plugin.sendMessage(ChatColor.DARK_AQUA  + "Ah mince tu as été ban durant ton petit paroours...");
-                return;
-            }
+
             if (!valideTime(time)) {
                 ban();
                 plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu viens de te prendre un ban sur le parcours :)!", name);
-            }
-            else {
+            } else {
                 save(time);
                 plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu as fini le parcours!", name);
             }
 
             plugin.sendMessage("Ton temps final : " + getTimer(), name);
         }
-        Jump.getInstance().removeJumper(name);
     }
 
     public void update(Location newCheckpoint) {
@@ -179,7 +170,7 @@ public class Jumper {
         try (PreparedStatement preparedStatement = conn.prepareStatement(INSERT)) {
             preparedStatement.setString(1, uuid);
             preparedStatement.setString(2, name);
-            preparedStatement.setDate(  3, new java.sql.Date(new Date().getTime()));
+            preparedStatement.setDate(3, new java.sql.Date(new Date().getTime()));
             preparedStatement.executeUpdate();
 
             Jump.getInstance().addBanned(name);

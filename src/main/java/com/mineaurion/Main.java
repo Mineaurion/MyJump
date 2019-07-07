@@ -3,7 +3,9 @@ package com.mineaurion;
 import com.mineaurion.commands.BanCommand;
 import com.mineaurion.commands.ReloadCommand;
 import com.mineaurion.commands.UnbanCommand;
+import com.mineaurion.events.OnPlayerCommandPreprocess;
 import com.mineaurion.events.OnPlayerInteract;
+import com.mineaurion.events.OnPlayerQuit;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
@@ -67,6 +69,8 @@ public final class Main extends JavaPlugin {
 
     private void initEvents() {
         getServer().getPluginManager().registerEvents(new OnPlayerInteract(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerQuit(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerCommandPreprocess(), this);
     }
 
     private void initCommands() {
