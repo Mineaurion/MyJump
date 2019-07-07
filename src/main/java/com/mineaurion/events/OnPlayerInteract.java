@@ -36,7 +36,9 @@ public class OnPlayerInteract implements Listener {
 
         if (action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK)) {
             if ( item != null && item.getType() == Material.ENDER_PEARL)
-                jump.cpItemInteract(event);
+                jump.cpItemInteract(event, false);
+            if ( item != null && item.getType() == Material.GLOWSTONE_DUST)
+                jump.cpItemInteract(event, true);
         }
     }
 

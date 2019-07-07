@@ -31,12 +31,14 @@ public class Jumper {
     private int minutes = 0;
     private int hours = 0;
 
-    public Jumper(String playerName) {
+    public Jumper(String playerName, boolean fictive) {
         plugin = Main.getInstance();
         name = playerName;
-        start_time = new Date().getTime();
 
-        Jump.getInstance().addJumper(this);
+        if (!fictive) {
+            start_time = new Date().getTime();
+            Jump.getInstance().addJumper(this);
+        }
     }
 
     public boolean isZorinova() {
@@ -59,7 +61,6 @@ public class Jumper {
     }
 
     public void start() {
-        Main.debugMap(Jump.getInstance().getScores(), name);
         if (isBan()) {
             plugin.sendMessage(ChatColor.RED + "Tu es ban du parcours...", name);
             stop(false);
@@ -74,14 +75,15 @@ public class Jumper {
         Bukkit.getPlayer(name).setScoreboard(sb);
 
         if (isZorinova())
-            plugin.sendMessage(ChatColor.DARK_AQUA + "Zorinova :"+ ChatColor.WHITE +" joueur de type enfant", name);
+            plugin.sendMessage(ChatColor.DARK_AQUA + "Zorinova :"+ ChatColor.WHITE +" joueur de type enfant commence le parcous", name);
 
         plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), "fly " + name + " off");
-        plugin.sendMessage(ChatColor.BLUE + "Jump start", name);
-        plugin.sendMessage(ChatColor.BLUE + "C'est parti!", name);
+        plugin.sendMessage(ChatColor.DARK_AQUA + "Jump start", name);
+        plugin.sendMessage(ChatColor.DARK_AQUA + "C'est parti!", name);
 
         new BukkitRunnable() {
             public void run() {
+
                 if (!Jumper.this.isRunning)
                     this.cancel();
                 else {
@@ -101,6 +103,11 @@ public class Jumper {
         if (end) {
             end_time = new Date().getTime();
             int time = (int) end_time - (int) start_time;
+            if (isBan()) {
+                Jump.getInstance().removeJumper(name);
+                plugin.sendMessage(ChatColor.DARK_AQUA  + "Ah mince tu as été ban durant ton petit paroours...");
+                return;
+            }
             if (!valideTime(time)) {
                 ban();
                 plugin.sendMessage(ChatColor.DARK_AQUA + "Bien joué !" + ChatColor.WHITE + " Tu viens de te prendre un ban sur le parcours :)!", name);
@@ -158,11 +165,11 @@ public class Jumper {
         return (time / 1000) >= min;
     }
 
-    private boolean isBan() {
+    public boolean isBan() {
         return Jump.getInstance().getBanned().contains(name);
     }
 
-    private void ban() {
+    public void ban() {
         final String INSERT = "INSERT INTO banned (uuid, name, created_at) VALUES (?,?,?)";
         Connection conn = Mysql.getConnection();
         if (conn == null)
@@ -176,7 +183,27 @@ public class Jumper {
             preparedStatement.executeUpdate();
 
             Jump.getInstance().addBanned(name);
-            plugin.sendMessage("Player " + name + " (" + uuid + ") has been banned! Time info : " + getTimer());
+            plugin.sendMessage("Player " + name + " (" + uuid + ") has been banned!");
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void unban() {
+        final String DELETE = "DELETE FROM banned WHERE name = ?";
+        Connection conn = Mysql.getConnection();
+        if (conn == null)
+            return;
+
+        String uuid = Bukkit.getPlayer(name).getUniqueId().toString();
+        try (PreparedStatement preparedStatement = conn.prepareStatement(DELETE)) {
+            preparedStatement.setString(1, name);
+
+            preparedStatement.execute();
+            Jump.getInstance().removeBanned(name);
+            plugin.sendMessage("Player " + name + " (" + uuid + ") has been unbanned!");
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         } catch (Exception e) {

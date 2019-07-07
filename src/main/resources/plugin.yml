@@ -1,18 +1,20 @@
-name: MyJump
+name: Jump
 version: 2
 main: com.mineaurion.Main
-prefix: MineJump
-load: STARTUP
 authors: [Ashk2a, Gaetann18]
-description: plugin de jump
+description: Plugin de Jump lobby
 website: mineaurion.com
 
 commands:
-  checkpoint:
-    description: Tp to last checkpoint
-    permission: jump.checkpoint
-    usage: "Tp to last checkpoint"
-  stopjump:
-    description: To stop timer and jump
-    permission: jump.stopjump
-    usage: "To stop timer and jump"
+  jreload:
+    description: Reload the Jump plugin
+    permission: jump.reload
+    usage: "Reload the Jump plugin"
+  jban:
+    description: Ban the target player
+    permission: jump.ban
+    usage: "/jban <playerName>"
+  junban:
+    description: Unban the target player
+    permission: jump.unban
+    usage: "/junban <playerName>"

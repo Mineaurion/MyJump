@@ -58,7 +58,7 @@ task installJar(type: Copy) {
 
 task installJarAshk(type: Copy) {
     from "./build/libs/Jump-${version}.jar"
-    into 'C:/Users/Ashk/Desktop/Mineaurion/Server/Spigot/plugins'
+    into 'C:/Users/Ashk/Desktop/Mineaurion/Server/Spigot1.12.2/plugins'
 }
 
 installJar.dependsOn shadowJar;

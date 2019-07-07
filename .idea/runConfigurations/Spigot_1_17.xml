@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Spigot 1.17" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/../../Server/Spigot1.17.10/spigot-1.7.10-SNAPSHOT-b1657.jar" />
+    <option name="WORKING_DIRECTORY" value="C:\Users\Ashk\Desktop\Mineaurion\Server\Spigot1.17.10" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2" />
+  </configuration>
+</component>

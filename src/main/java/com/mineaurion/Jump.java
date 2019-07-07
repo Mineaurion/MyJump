@@ -28,8 +28,6 @@ public class Jump {
         plugin = Main.getInstance();
 
         _instance = this;
-        loadBannedPlayers();
-        loadBestScoresPlayers();
     }
 
     public static Jump getInstance() {
@@ -44,7 +42,15 @@ public class Jump {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+
+        loadBannedPlayers();
+        loadBestScoresPlayers();
+
         return this;
+    }
+
+    public void reload() {
+        loadBannedPlayers();
     }
 
     public void cpBlockInteract(PlayerInteractEvent event) {
@@ -61,14 +67,14 @@ public class Jump {
         boolean exist = Jump.getInstance().jumperExist(player.getName());
 
         if (bunder.getType().equals(startBlock) && !exist)
-            new Jumper(player.getName()).start();
+            new Jumper(player.getName(), false).start();
         if (bunder.getType().equals(checkBlock) && exist)
             getJumper(player.getName()).update(event.getClickedBlock().getLocation());
         if (bunder.getType().equals(endBlock) && exist)
             getJumper(player.getName()).stop(true);
     }
 
-    public void cpItemInteract(PlayerInteractEvent event) {
+    public void cpItemInteract(PlayerInteractEvent event, boolean stop) {
         event.setCancelled(true);
 
         Player player = event.getPlayer();
@@ -81,13 +87,17 @@ public class Jump {
         }
 
         Jumper jumper = getJumper(player.getName());
+        if (stop) {
+            jumper.stop(false);
+            player.sendMessage(ChatColor.DARK_AQUA + "Event stop en cours de route!");
+        } else {
+            if (!jumper.hasCheckpoints()) {
+                player.sendMessage(ChatColor.RED + "Tu n'as pas encore un checkpoint!");
+                return;
+            }
 
-        if (!jumper.hasCheckpoints()) {
-            player.sendMessage(ChatColor.RED + "Tu n'as pas encore un checkpoint!");
-            return;
+            jumper.goToCheckpoint();
         }
-
-        jumper.goToCheckpoint();
     }
 
 
@@ -123,6 +133,10 @@ public class Jump {
     public void addBanned(String name) {
         if (!banned.contains(name))
             banned.add(name);
+    }
+
+    public void removeBanned(String name) {
+        banned.remove(name);
     }
 
     public Map<String, Integer> getScores() {
@@ -161,6 +175,8 @@ public class Jump {
         Connection conn = Mysql.getConnection();
         if (conn == null)
             return;
+
+        banned = new ArrayList<String>();
 
         try (PreparedStatement preparedStatement = conn.prepareStatement(SELECT)) {
             try (ResultSet rs = preparedStatement.executeQuery()) {

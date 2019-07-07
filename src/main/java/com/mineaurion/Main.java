@@ -1,5 +1,8 @@
 package com.mineaurion;
 
+import com.mineaurion.commands.BanCommand;
+import com.mineaurion.commands.ReloadCommand;
+import com.mineaurion.commands.UnbanCommand;
 import com.mineaurion.events.OnPlayerInteract;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -19,8 +22,8 @@ public final class Main extends JavaPlugin {
 
     public Main() throws IOException, SQLException {
         super();
+        jump = Jump.getInstance();
         _instance = this;
-        jump = Jump.getInstance().init();
     }
 
     public static void debugMap(Map<String, Integer> map, String playerName) {
@@ -40,6 +43,7 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         sendMessage("Start plugin... ");
         this.init();
+        jump.init();
     }
 
     @Override
@@ -66,6 +70,9 @@ public final class Main extends JavaPlugin {
     }
 
     private void initCommands() {
+        registerCommand("jreload", new ReloadCommand());
+        registerCommand("jban", new BanCommand());
+        registerCommand("junban", new UnbanCommand());
         sendMessage("Total : " + this.commandCount + " commands(s) loaded (" + this.commandIgnoredCount + " ignored)");
     }
 
@@ -87,5 +94,9 @@ public final class Main extends JavaPlugin {
 
     public void sendMessage(String msg) {
         Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] " + msg);
+    }
+
+    public Jump getJump() {
+        return jump;
     }
 }

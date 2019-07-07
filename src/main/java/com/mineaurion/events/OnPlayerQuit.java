@@ -18,7 +18,7 @@ public class OnPlayerQuit implements Listener {
     }
 
     @EventHandler
-    public void handler(PlayerQuitEvent event) throws SQLException {
+    public void handler(PlayerQuitEvent event) {
         if (jump.jumperExist(event.getPlayer().getName()))
             jump.getJumper(event.getPlayer().getName()).stop(false);
     }

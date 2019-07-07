@@ -1,8 +1,12 @@
 jump:
-  minSeconds: 30
+  minSeconds: 10
 database:
   host: 'localhost'
   port: '3306'
   username: 'root'
   password: 'root'
   db: 'jump'
+commands:
+  jreload: true
+  jban: true
+  junban: true
